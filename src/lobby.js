@@ -1,9 +1,11 @@
 import { db, doc, setDoc, getDoc, serverTimestamp } from './firebase.js';
+import { hashPassword, isValidPassword } from './crypto.js';
 
 const nicknameInput = document.getElementById('nickname');
 const roomIdInput = document.getElementById('room-id');
 const createBtn = document.getElementById('create-btn');
 const joinBtn = document.getElementById('join-btn');
+const createPasswordInput = document.getElementById('create-password');
 const errorEl = document.getElementById('error');
 const recentSection = document.getElementById('recent-section');
 const recentList = document.getElementById('recent-list');
@@ -100,13 +102,22 @@ const goToRoom = (roomId) => {
 createBtn.addEventListener('click', async () => {
   const name = saveNickname();
   if (!name) return;
+  const password = createPasswordInput.value;
+  if (password && !isValidPassword(password)) {
+    showError('密碼長度須為 4-8 字');
+    createPasswordInput.focus();
+    return;
+  }
   showError('');
   createBtn.disabled = true;
   try {
     const roomId = generateRoomId();
-    await setDoc(doc(db, 'rooms', roomId), {
-      createdAt: serverTimestamp(),
-    });
+    const roomData = { createdAt: serverTimestamp() };
+    if (password) {
+      roomData.passwordHash = await hashPassword(roomId, password);
+      sessionStorage.setItem(`sheetchat:pwd:${roomId}`, password);
+    }
+    await setDoc(doc(db, 'rooms', roomId), roomData);
     goToRoom(roomId);
   } catch (err) {
     console.error(err);
@@ -114,6 +125,20 @@ createBtn.addEventListener('click', async () => {
     createBtn.disabled = false;
   }
 });
+
+const verifyRoomPassword = async (roomId, expectedHash) => {
+  for (let i = 0; i < 3; i += 1) {
+    const pwd = window.prompt('這個房間有密碼，請輸入：');
+    if (pwd === null) return false;
+    const hash = await hashPassword(roomId, pwd);
+    if (hash === expectedHash) {
+      sessionStorage.setItem(`sheetchat:pwd:${roomId}`, pwd);
+      return true;
+    }
+    window.alert('密碼錯誤');
+  }
+  return false;
+};
 
 joinBtn.addEventListener('click', async () => {
   const name = saveNickname();
@@ -131,6 +156,17 @@ joinBtn.addEventListener('click', async () => {
       showError('找不到這個房間');
       joinBtn.disabled = false;
       return;
+    }
+    const data = snap.data();
+    if (data.passwordHash) {
+      const userSnap = await getDoc(doc(db, 'rooms', roomId, 'users', name));
+      if (!userSnap.exists()) {
+        const ok = await verifyRoomPassword(roomId, data.passwordHash);
+        if (!ok) {
+          joinBtn.disabled = false;
+          return;
+        }
+      }
     }
     goToRoom(roomId);
   } catch (err) {

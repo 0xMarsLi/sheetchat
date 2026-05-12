@@ -14,6 +14,7 @@ import {
   Timestamp,
 } from './firebase.js';
 import { MOCK_THEMES, DEFAULT_THEME } from './mocks.js';
+import { hashPassword } from './crypto.js';
 
 const COLORS = [
   '#1a73e8',
@@ -82,6 +83,26 @@ appEl.classList.add('is-mock');
 
 const INACTIVITY_MS = 10000;
 let inactivityTimer = null;
+
+const BASE_TITLE = '未命名的試算表 - Google 試算表';
+let unreadCount = 0;
+let prevMessageCount = 0;
+
+const isReadingChat = () => !document.hidden && !mockActive;
+
+const updateTitle = () => {
+  document.title = unreadCount > 0 ? `(${unreadCount}) ${BASE_TITLE}` : BASE_TITLE;
+};
+
+const resetUnread = () => {
+  if (unreadCount === 0) return;
+  unreadCount = 0;
+  updateTitle();
+};
+
+document.addEventListener('visibilitychange', () => {
+  if (isReadingChat()) resetUnread();
+});
 
 const resetInactivityTimer = () => {
   clearTimeout(inactivityTimer);
@@ -241,6 +262,26 @@ let columnToUser = {};
 let messages = [];
 let selfColumn = null;
 let inputElement = null;
+
+const ensurePassword = async (roomDoc) => {
+  if (!roomDoc.passwordHash) return true;
+  const userSnap = await getDoc(doc(db, 'rooms', roomId, 'users', nickname));
+  if (userSnap.exists()) return true;
+  const cached = sessionStorage.getItem(`sheetchat:pwd:${roomId}`);
+  if (cached && (await hashPassword(roomId, cached)) === roomDoc.passwordHash) {
+    return true;
+  }
+  for (let i = 0; i < 3; i += 1) {
+    const pwd = window.prompt('這個房間有密碼，請輸入：');
+    if (pwd === null) return false;
+    if ((await hashPassword(roomId, pwd)) === roomDoc.passwordHash) {
+      sessionStorage.setItem(`sheetchat:pwd:${roomId}`, pwd);
+      return true;
+    }
+    window.alert('密碼錯誤');
+  }
+  return false;
+};
 
 const joinRoom = async () => {
   const userRef = doc(db, 'rooms', roomId, 'users', nickname);
@@ -468,6 +509,7 @@ const setMockActive = (active) => {
   appEl.classList.toggle('is-mock', mockActive);
   renderGrid();
   scrollToLastDataRow();
+  if (!active && !document.hidden) resetUnread();
 };
 
 const computeScrollTarget = () => {
@@ -520,6 +562,17 @@ const recordRecentRoom = () => {
 };
 
 const start = async () => {
+  const roomSnap = await getDoc(doc(db, 'rooms', roomId));
+  if (!roomSnap.exists()) {
+    alert('找不到這個房間');
+    window.location.replace('index.html');
+    return;
+  }
+  const ok = await ensurePassword(roomSnap.data());
+  if (!ok) {
+    window.location.replace('index.html');
+    return;
+  }
   const me = await joinRoom();
   selfColumn = me.column;
   recordRecentRoom();
@@ -553,6 +606,14 @@ const start = async () => {
           if (!m.expiresAt || !m.expiresAt.toDate) return true;
           return m.expiresAt.toDate() > now;
         });
+
+      const delta = Math.max(0, messages.length - prevMessageCount);
+      prevMessageCount = messages.length;
+      if (!isFirstSnapshot && delta > 0 && !isReadingChat()) {
+        unreadCount += delta;
+        updateTitle();
+      }
+
       renderGrid();
       updateInputRowNumber();
       updateFormulaBar();

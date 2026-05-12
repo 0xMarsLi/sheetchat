@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>sheetchat</title>
+    <link rel="icon" type="image/svg+xml" href="src/favicon.svg" />
     <link rel="stylesheet" href="src/styles.css" />
   </head>
   <body>
@@ -18,7 +19,8 @@
         <input id="nickname" type="text" placeholder="你的名字（會出現在欄標題）" maxlength="16" />
 
         <h2>建立新房間</h2>
-        <button id="create-btn" class="btn btn-primary" style="width: 100%">建立並進入</button>
+        <input id="create-password" type="password" placeholder="房間密碼（選填，4-8 字）" maxlength="8" autocomplete="new-password" />
+        <button id="create-btn" class="btn btn-primary" style="width: 100%; margin-top: 8px">建立並進入</button>
 
         <h2>或加入現有房間</h2>
         <div class="lobby-row">
