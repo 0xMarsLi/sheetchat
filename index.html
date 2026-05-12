@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>sheetchat</title>
+    <link rel="stylesheet" href="src/styles.css" />
+  </head>
+  <body>
+    <div class="lobby">
+      <div class="lobby-card">
+        <div class="lobby-logo">
+          <div class="lobby-logo-icon"></div>
+          <div class="lobby-logo-text">sheetchat</div>
+        </div>
+
+        <h2>暱稱</h2>
+        <input id="nickname" type="text" placeholder="你的名字（會出現在欄標題）" maxlength="16" />
+
+        <h2>建立新房間</h2>
+        <button id="create-btn" class="btn btn-primary" style="width: 100%">建立並進入</button>
+
+        <h2>或加入現有房間</h2>
+        <div class="lobby-row">
+          <input id="room-id" type="text" placeholder="輸入房間碼" maxlength="12" />
+          <button id="join-btn" class="btn">加入</button>
+        </div>
+
+        <div id="recent-section" class="recent-section" hidden>
+          <h2>最近加入</h2>
+          <ul id="recent-list" class="recent-list"></ul>
+        </div>
+
+        <div id="error" class="lobby-error"></div>
+      </div>
+    </div>
+
+    <script type="module" src="src/lobby.js"></script>
+  </body>
+</html>
