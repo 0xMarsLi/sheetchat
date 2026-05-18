@@ -15,6 +15,9 @@ import {
 } from './firebase.js';
 import { MOCK_THEMES, DEFAULT_THEME } from './mocks.js';
 import { hashPassword } from './crypto.js';
+import { VERSION } from './version.js';
+
+console.log(`sheetchat ${VERSION}`);
 
 const COLORS = [
   '#1a73e8',
@@ -101,7 +104,21 @@ const resetUnread = () => {
 };
 
 document.addEventListener('visibilitychange', () => {
-  if (isReadingChat()) resetUnread();
+  if (document.hidden) {
+    inputElement?.blur();
+  } else {
+    // browsers auto-restore focus on tab return; force blur again
+    requestAnimationFrame(() => inputElement?.blur());
+    if (isReadingChat()) resetUnread();
+  }
+});
+
+window.addEventListener('blur', () => {
+  inputElement?.blur();
+});
+
+window.addEventListener('focus', () => {
+  requestAnimationFrame(() => inputElement?.blur());
 });
 
 const resetInactivityTimer = () => {
@@ -415,6 +432,40 @@ const updateFormulaBar = () => {
   }
 };
 
+const URL_RE = /https?:\/\/[^\s]+/g;
+const TRAILING_PUNCT = /[.,;:!?)\]}>'"，。！？、；：）】」』]+$/;
+const URL_DISPLAY_MAX = 40;
+
+const shortenUrl = (url) => {
+  if (url.length <= URL_DISPLAY_MAX) return url;
+  const head = Math.ceil((URL_DISPLAY_MAX - 1) / 2);
+  const tail = Math.floor((URL_DISPLAY_MAX - 1) / 2);
+  return `${url.slice(0, head)}…${url.slice(-tail)}`;
+};
+
+const renderTextWithLinks = (cell, text) => {
+  cell.textContent = '';
+  let last = 0;
+  for (const m of text.matchAll(URL_RE)) {
+    if (m.index > last) cell.appendChild(document.createTextNode(text.slice(last, m.index)));
+    let url = m[0];
+    const tail = url.match(TRAILING_PUNCT);
+    const trailing = tail ? tail[0] : '';
+    if (trailing) url = url.slice(0, -trailing.length);
+    const a = document.createElement('a');
+    a.href = url;
+    a.textContent = shortenUrl(url);
+    a.title = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.className = 'msg-link';
+    cell.appendChild(a);
+    if (trailing) cell.appendChild(document.createTextNode(trailing));
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) cell.appendChild(document.createTextNode(text.slice(last)));
+};
+
 const appendCell = (parent, className, gridCol, gridRow, text) => {
   const cell = document.createElement('div');
   cell.className = className;
@@ -447,6 +498,7 @@ const buildContentMap = (mock) => {
         text: msg.text,
         classes: ['message'],
         title: `${msg.author} • ${formatTime(msg.createdAt)}`,
+        linkify: true,
       });
     });
   }
@@ -486,7 +538,8 @@ const renderGrid = () => {
     for (let c = 0; c < numCols; c += 1) {
       const content = contentMap.get(`${r + 2}|${c + 2}`);
       const cls = content ? `cell ${content.classes.join(' ')}` : 'cell';
-      const cell = appendCell(gridEl, cls, c + 2, r + 2, content ? content.text : '');
+      const cell = appendCell(gridEl, cls, c + 2, r + 2, content && !content.linkify ? content.text : '');
+      if (content?.linkify) renderTextWithLinks(cell, content.text);
       if (content && content.title) cell.title = content.title;
     }
   }

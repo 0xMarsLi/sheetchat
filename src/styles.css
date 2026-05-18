@@ -90,18 +90,54 @@ input {
   margin: 16px 0 8px;
 }
 
-.lobby input[type='text'] {
+.lobby input[type='text'],
+.lobby input[type='password'] {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #dadce0;
   border-radius: 4px;
   font-size: 14px;
   outline: none;
+  box-sizing: border-box;
+  background: #fff;
+  font-family: inherit;
 }
 
-.lobby input[type='text']:focus {
+.lobby input[type='password']::-ms-reveal,
+.lobby input[type='password']::-ms-clear,
+.lobby input[type='password']::-webkit-credentials-auto-fill-button,
+.lobby input[type='password']::-webkit-strong-password-auto-fill-button {
+  display: none !important;
+  visibility: hidden;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+.lobby input:-webkit-autofill,
+.lobby input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #fff inset;
+  -webkit-text-fill-color: #202124;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+.lobby-version {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 11px;
+  color: #9aa0a6;
+  user-select: none;
+}
+
+.lobby input[type='text']:focus,
+.lobby input[type='password']:focus {
   border-color: #1a73e8;
   box-shadow: 0 0 0 1px #1a73e8;
+}
+
+.lobby input + .btn,
+.lobby input + button.btn {
+  margin-top: 8px;
 }
 
 .lobby-row {
@@ -735,6 +771,16 @@ a.menu-dropdown-item {
 .cell.message {
   cursor: default;
   color: #202124;
+}
+
+.msg-link {
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.msg-link:hover {
+  text-decoration: underline;
 }
 
 .cell.mock-data,

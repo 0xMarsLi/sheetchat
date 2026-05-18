@@ -1,5 +1,10 @@
 import { db, doc, setDoc, getDoc, serverTimestamp } from './firebase.js';
 import { hashPassword, isValidPassword } from './crypto.js';
+import { VERSION } from './version.js';
+
+console.log(`sheetchat ${VERSION}`);
+const versionEl = document.getElementById('version');
+if (versionEl) versionEl.textContent = `v${VERSION}`;
 
 const nicknameInput = document.getElementById('nickname');
 const roomIdInput = document.getElementById('room-id');
