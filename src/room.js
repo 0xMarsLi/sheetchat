@@ -459,6 +459,9 @@ const renderTextWithLinks = (cell, text) => {
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
     a.className = 'msg-link';
+    // prevent input blur when clicking link; otherwise renderGrid()
+    // detaches the anchor before mouseup, cancelling the navigation
+    a.addEventListener('mousedown', (e) => e.preventDefault());
     cell.appendChild(a);
     if (trailing) cell.appendChild(document.createTextNode(trailing));
     last = m.index + m[0].length;
