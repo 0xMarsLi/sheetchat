@@ -1,6 +1,9 @@
 import { db, doc, setDoc, getDoc, serverTimestamp } from './firebase.js';
 import { hashPassword, isValidPassword } from './crypto.js';
 import { VERSION } from './version.js';
+import { t, applyI18n } from './i18n.js';
+
+applyI18n();
 
 console.log(`sheetchat ${VERSION}`);
 const versionEl = document.getElementById('version');
@@ -34,12 +37,12 @@ const writeRecent = (rooms) => {
 const formatRelative = (ts) => {
   const diff = Date.now() - ts;
   const min = Math.floor(diff / 60000);
-  if (min < 1) return '剛剛';
-  if (min < 60) return `${min} 分鐘前`;
+  if (min < 1) return t('time.justNow');
+  if (min < 60) return t('time.minAgo', { n: min });
   const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr} 小時前`;
+  if (hr < 24) return t('time.hrAgo', { n: hr });
   const day = Math.floor(hr / 24);
-  return `${day} 天前`;
+  return t('time.dayAgo', { n: day });
 };
 
 const renderRecent = () => {
@@ -56,7 +59,7 @@ const renderRecent = () => {
     li.innerHTML = `
       <span class="recent-id">${r.id}</span>
       <span class="recent-time">${formatRelative(r.joinedAt)}</span>
-      <button class="recent-remove" title="移除" data-id="${r.id}">✕</button>
+      <button class="recent-remove" title="${t('lobby.remove')}" data-id="${r.id}">✕</button>
     `;
     li.addEventListener('click', (e) => {
       if (e.target.closest('.recent-remove')) return;
@@ -83,7 +86,7 @@ const showError = (msg) => {
 const saveNickname = () => {
   const name = nicknameInput.value.trim();
   if (!name) {
-    showError('請先輸入暱稱');
+    showError(t('lobby.enterNickname'));
     nicknameInput.focus();
     return null;
   }
@@ -109,7 +112,7 @@ createBtn.addEventListener('click', async () => {
   if (!name) return;
   const password = createPasswordInput.value;
   if (password && !isValidPassword(password)) {
-    showError('密碼長度須為 4-8 字');
+    showError(t('lobby.badPassword'));
     createPasswordInput.focus();
     return;
   }
@@ -126,21 +129,21 @@ createBtn.addEventListener('click', async () => {
     goToRoom(roomId);
   } catch (err) {
     console.error(err);
-    showError('建立房間失敗：' + err.message);
+    showError(t('lobby.createFailed') + err.message);
     createBtn.disabled = false;
   }
 });
 
 const verifyRoomPassword = async (roomId, expectedHash) => {
   for (let i = 0; i < 3; i += 1) {
-    const pwd = window.prompt('這個房間有密碼，請輸入：');
+    const pwd = window.prompt(t('lobby.pwPrompt'));
     if (pwd === null) return false;
     const hash = await hashPassword(roomId, pwd);
     if (hash === expectedHash) {
       sessionStorage.setItem(`sheetchat:pwd:${roomId}`, pwd);
       return true;
     }
-    window.alert('密碼錯誤');
+    window.alert(t('lobby.pwWrong'));
   }
   return false;
 };
@@ -150,7 +153,7 @@ joinBtn.addEventListener('click', async () => {
   if (!name) return;
   const roomId = roomIdInput.value.trim().toLowerCase();
   if (!roomId) {
-    showError('請輸入房間碼');
+    showError(t('lobby.enterRoomId'));
     return;
   }
   showError('');
@@ -158,7 +161,7 @@ joinBtn.addEventListener('click', async () => {
   try {
     const snap = await getDoc(doc(db, 'rooms', roomId));
     if (!snap.exists()) {
-      showError('找不到這個房間');
+      showError(t('lobby.roomNotFound'));
       joinBtn.disabled = false;
       return;
     }
@@ -176,7 +179,7 @@ joinBtn.addEventListener('click', async () => {
     goToRoom(roomId);
   } catch (err) {
     console.error(err);
-    showError('加入失敗：' + err.message);
+    showError(t('lobby.joinFailed') + err.message);
     joinBtn.disabled = false;
   }
 });

@@ -472,7 +472,8 @@ a.menu-dropdown-item {
   color: #1a73e8;
 }
 
-.theme-item.is-active .theme-check {
+.theme-item.is-active .theme-check,
+.lang-item.is-active .theme-check {
   visibility: visible;
 }
 

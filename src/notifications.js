@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+
 const STORAGE_KEY = 'sheetchat:settings';
 const RATE_LIMIT_MS = 10_000;
 
@@ -62,22 +64,26 @@ const playClickSound = () => {
 };
 
 const showDesktopNotification = () => {
-  if (!('Notification' in window)) return;
-  if (Notification.permission !== 'granted') return;
+  if (!('Notification' in window)) {
+    console.warn('[sheetchat] Notification API unavailable');
+    return;
+  }
+  if (Notification.permission !== 'granted') {
+    console.warn('[sheetchat] Notification permission:', Notification.permission);
+    return;
+  }
   try {
-    const n = new Notification('未命名的試算表', {
-      body: '雲端硬碟已同步更新',
+    const n = new Notification(t('notify.title'), {
+      body: t('notify.body'),
       icon: 'src/favicon.svg',
-      tag: 'sheetchat-update',
       silent: true,
     });
-    setTimeout(() => n.close(), 4000);
     n.onclick = () => {
       window.focus();
       n.close();
     };
-  } catch {
-    // some browsers throw if Notification constructor blocked
+  } catch (err) {
+    console.error('[sheetchat] Notification failed', err);
   }
 };
 
@@ -85,10 +91,14 @@ let lastFiredAt = 0;
 
 export const notifyNewMessage = () => {
   const now = Date.now();
-  if (now - lastFiredAt < RATE_LIMIT_MS) return;
+  if (now - lastFiredAt < RATE_LIMIT_MS) {
+    console.log('[sheetchat] notify skipped: rate-limited');
+    return;
+  }
   lastFiredAt = now;
 
   const settings = loadSettings();
+  console.log('[sheetchat] notify fired, settings:', settings);
   if (settings.sound) playClickSound();
   if (settings.desktop) showDesktopNotification();
 };

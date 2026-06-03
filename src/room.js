@@ -22,6 +22,9 @@ import {
   notifyNewMessage,
   requestDesktopPermission,
 } from './notifications.js';
+import { t, applyI18n, LOCALE, setLocale } from './i18n.js';
+
+applyI18n();
 
 console.log(`sheetchat ${VERSION}`);
 const footerVersionEl = document.getElementById('footer-version');
@@ -67,7 +70,7 @@ shareBtn.addEventListener('click', async () => {
   const url = `${location.origin}${location.pathname}?room=${roomId}`;
   try {
     await navigator.clipboard.writeText(url);
-    showToast('已複製分享連結');
+    showToast(t('toast.linkCopied'));
   } catch (_) {
     showToast(url);
   }
@@ -104,7 +107,7 @@ let settings = loadSettings();
 let inactivityMs = settings.inactivitySeconds * 1000;
 let inactivityTimer = null;
 
-const BASE_TITLE = '未命名的試算表 - Google 試算表';
+const BASE_TITLE = t('doc.title');
 let unreadCount = 0;
 let prevMessageCount = 0;
 
@@ -176,6 +179,14 @@ document.querySelectorAll('.theme-item').forEach((el) => {
   });
 });
 
+document.querySelectorAll('.lang-item').forEach((el) => {
+  el.classList.toggle('is-active', el.dataset.locale === LOCALE);
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setLocale(el.dataset.locale);
+  });
+});
+
 const closeAllDropdowns = (except) => {
   allDropdowns.forEach(({ dropdown }) => {
     if (dropdown !== except) dropdown.classList.remove('is-open');
@@ -215,7 +226,7 @@ nicknameForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const newName = nicknameInput.value.trim();
   if (!newName) {
-    nicknameError.textContent = '暱稱不能空白';
+    nicknameError.textContent = t('nickname.empty');
     return;
   }
   // First-time welcome flow (no existing nickname)
@@ -233,13 +244,13 @@ nicknameForm.addEventListener('submit', async (e) => {
     const targetRef = doc(db, 'rooms', roomId, 'users', newName);
     const targetSnap = await getDoc(targetRef);
     if (targetSnap.exists()) {
-      nicknameError.textContent = '這個房間已經有人用這個暱稱';
+      nicknameError.textContent = t('nickname.taken');
       return;
     }
     const oldRef = doc(db, 'rooms', roomId, 'users', nickname);
     const oldSnap = await getDoc(oldRef);
     if (!oldSnap.exists()) {
-      nicknameError.textContent = '找不到目前的使用者資料';
+      nicknameError.textContent = t('nickname.noUser');
       return;
     }
     const oldData = oldSnap.data();
@@ -250,7 +261,7 @@ nicknameForm.addEventListener('submit', async (e) => {
     location.reload();
   } catch (err) {
     console.error(err);
-    nicknameError.textContent = '更新失敗：' + err.message;
+    nicknameError.textContent = t('nickname.updateFailed') + err.message;
   }
 });
 
@@ -346,13 +357,13 @@ const ensurePassword = async (roomDoc) => {
     return true;
   }
   for (let i = 0; i < 3; i += 1) {
-    const pwd = window.prompt('這個房間有密碼，請輸入：');
+    const pwd = window.prompt(t('lobby.pwPrompt'));
     if (pwd === null) return false;
     if ((await hashPassword(roomId, pwd)) === roomDoc.passwordHash) {
       sessionStorage.setItem(`sheetchat:pwd:${roomId}`, pwd);
       return true;
     }
-    window.alert('密碼錯誤');
+    window.alert(t('lobby.pwWrong'));
   }
   return false;
 };
@@ -414,14 +425,14 @@ const compressImage = (file) =>
         dataUrl = canvas.toDataURL('image/jpeg', quality);
       }
       if (dataUrl.length > IMG_MAX_DATAURL_LEN) {
-        reject(new Error('圖片太大，請改傳較小的圖'));
+        reject(new Error(t('msg.imageTooLarge')));
         return;
       }
       resolve(dataUrl);
     };
     img.onerror = () => {
       URL.revokeObjectURL(objUrl);
-      reject(new Error('圖片載入失敗'));
+      reject(new Error(t('msg.imageLoadFailed')));
     };
     img.src = objUrl;
   });
@@ -500,7 +511,7 @@ const attachInputHandlers = (input) => {
           await sendImage(dataUrl);
         } catch (err) {
           console.error('paste image failed', err);
-          showToast(err.message || '圖片傳送失敗');
+          showToast(err.message || t('msg.imageSendFailed'));
         }
         return;
       }
@@ -549,7 +560,7 @@ const updateFormulaBar = () => {
   }
   if (messages.length > 0) {
     const last = messages[messages.length - 1];
-    formulaEl.textContent = last.text || (last.image ? '[圖片]' : '');
+    formulaEl.textContent = last.text || (last.image ? t('msg.image') : '');
   } else {
     formulaEl.textContent = '';
   }
@@ -617,8 +628,8 @@ const renderMessageContent = (cell, content) => {
     if (content.text) cell.appendChild(document.createTextNode(' '));
     const a = document.createElement('a');
     a.href = '#';
-    a.textContent = '[圖片]';
-    a.title = '點擊開啟圖片';
+    a.textContent = t('msg.image');
+    a.title = t('msg.openImage');
     a.className = 'msg-link';
     a.addEventListener('mousedown', (e) => e.preventDefault());
     a.addEventListener('click', (e) => {
@@ -781,7 +792,7 @@ const recordRecentRoom = () => {
 const start = async () => {
   const roomSnap = await getDoc(doc(db, 'rooms', roomId));
   if (!roomSnap.exists()) {
-    alert('找不到這個房間');
+    alert(t('lobby.roomNotFound'));
     window.location.replace('index.html');
     return;
   }
@@ -856,9 +867,9 @@ if (!nickname) {
   // Shared link without nickname → show welcome dialog instead of redirecting
   const titleEl = nicknameDialog.querySelector('.dialog-title');
   const hintEl = nicknameDialog.querySelector('.dialog-hint');
-  if (titleEl) titleEl.textContent = '歡迎加入！';
-  if (hintEl) hintEl.textContent = '請設定一個暱稱（會顯示在你的欄標題）';
-  if (nicknameCancel) nicknameCancel.textContent = '回首頁';
+  if (titleEl) titleEl.textContent = t('nickname.welcomeTitle');
+  if (hintEl) hintEl.textContent = t('nickname.welcomeHint');
+  if (nicknameCancel) nicknameCancel.textContent = t('nickname.backHome');
   nicknameInput.value = '';
   nicknameError.textContent = '';
   nicknameDialog.showModal();
@@ -866,6 +877,6 @@ if (!nickname) {
 } else {
   start().catch((err) => {
     console.error(err);
-    alert('連線失敗：' + err.message);
+    alert(t('toast.connectFailed') + err.message);
   });
 }

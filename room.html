@@ -14,7 +14,7 @@
   <body>
     <div class="app">
       <div class="titlebar">
-        <a href="index.html" class="titlebar-logo" title="回到首頁">
+        <a href="index.html" class="titlebar-logo" data-i18n-title="tb.home" title="回到首頁">
           <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M30 4H12C9.79 4 8 5.79 8 8v32c0 2.21 1.79 4 4 4h24c2.21 0 4-1.79 4-4V14L30 4z"
@@ -33,47 +33,63 @@
         </a>
         <div class="titlebar-left">
           <div class="titlebar-row1">
-            <div class="titlebar-name">未命名的試算表</div>
-            <button class="title-icon" tabindex="-1" title="加上星號">
+            <div class="titlebar-name" data-i18n="doc.titleName">未命名的試算表</div>
+            <button class="title-icon" tabindex="-1" data-i18n-title="tb.star" title="加上星號">
               <span class="material-symbols-outlined">star</span>
             </button>
-            <button class="title-icon" tabindex="-1" title="移至">
+            <button class="title-icon" tabindex="-1" data-i18n-title="tb.move" title="移至">
               <span class="material-symbols-outlined">drive_file_move</span>
             </button>
-            <button class="title-icon" tabindex="-1" title="已將所有變更儲存到雲端硬碟">
+            <button class="title-icon" tabindex="-1" data-i18n-title="tb.saved" title="已將所有變更儲存到雲端硬碟">
               <span class="material-symbols-outlined">cloud_done</span>
             </button>
           </div>
           <div class="titlebar-menu">
             <span class="menu-item" id="menu-file">
-              檔案
+              <span class="menu-label" data-i18n="menu.file">檔案</span>
               <div class="menu-dropdown" id="menu-file-dropdown">
                 <a class="menu-dropdown-item" id="menu-file-home" href="index.html">
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">home</span></span
                   >
-                  <span class="menu-dropdown-label">回到首頁</span>
+                  <span class="menu-dropdown-label" data-i18n="file.home">回到首頁</span>
                   <span class="menu-shortcut">⌘⇧H</span>
                 </a>
                 <div class="menu-dropdown-item" id="menu-file-settings">
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">settings</span></span
                   >
-                  <span class="menu-dropdown-label">設定</span>
+                  <span class="menu-dropdown-label" data-i18n="file.settings">設定</span>
+                </div>
+                <div class="menu-dropdown-divider"></div>
+                <div class="menu-dropdown-section" data-i18n="file.language">語言</div>
+                <div class="menu-dropdown-item lang-item" data-locale="zh-TW">
+                  <span class="menu-dropdown-icon"
+                    ><span class="material-symbols-outlined">translate</span></span
+                  >
+                  <span class="menu-dropdown-label">繁體中文</span>
+                  <span class="material-symbols-outlined theme-check">check</span>
+                </div>
+                <div class="menu-dropdown-item lang-item" data-locale="en">
+                  <span class="menu-dropdown-icon"
+                    ><span class="material-symbols-outlined">translate</span></span
+                  >
+                  <span class="menu-dropdown-label">English</span>
+                  <span class="material-symbols-outlined theme-check">check</span>
                 </div>
                 <div class="menu-dropdown-divider"></div>
                 <div class="menu-dropdown-item disabled">
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">add</span></span
                   >
-                  <span class="menu-dropdown-label">新增</span>
+                  <span class="menu-dropdown-label" data-i18n="file.new">新增</span>
                   <span class="menu-shortcut">▸</span>
                 </div>
                 <div class="menu-dropdown-item disabled">
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">folder_open</span></span
                   >
-                  <span class="menu-dropdown-label">開啟</span>
+                  <span class="menu-dropdown-label" data-i18n="file.open">開啟</span>
                   <span class="menu-shortcut">⌘O</span>
                 </div>
                 <div class="menu-dropdown-divider"></div>
@@ -81,32 +97,32 @@
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">file_copy</span></span
                   >
-                  <span class="menu-dropdown-label">建立副本</span>
+                  <span class="menu-dropdown-label" data-i18n="file.makeCopy">建立副本</span>
                 </div>
                 <div class="menu-dropdown-item disabled">
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">download</span></span
                   >
-                  <span class="menu-dropdown-label">下載</span>
+                  <span class="menu-dropdown-label" data-i18n="file.download">下載</span>
                   <span class="menu-shortcut">▸</span>
                 </div>
               </div>
             </span>
             <span class="menu-item" id="menu-edit">
-              編輯
+              <span class="menu-label" data-i18n="menu.edit">編輯</span>
               <div class="menu-dropdown" id="menu-edit-dropdown">
                 <div class="menu-dropdown-item disabled">
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">undo</span></span
                   >
-                  <span class="menu-dropdown-label">復原</span>
+                  <span class="menu-dropdown-label" data-i18n="edit.undo">復原</span>
                   <span class="menu-shortcut">⌘Z</span>
                 </div>
                 <div class="menu-dropdown-item disabled">
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">redo</span></span
                   >
-                  <span class="menu-dropdown-label">重做</span>
+                  <span class="menu-dropdown-label" data-i18n="edit.redo">重做</span>
                   <span class="menu-shortcut">⌘Y</span>
                 </div>
                 <div class="menu-dropdown-divider"></div>
@@ -114,21 +130,21 @@
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">content_cut</span></span
                   >
-                  <span class="menu-dropdown-label">剪下</span>
+                  <span class="menu-dropdown-label" data-i18n="edit.cut">剪下</span>
                   <span class="menu-shortcut">⌘X</span>
                 </div>
                 <div class="menu-dropdown-item disabled">
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">content_copy</span></span
                   >
-                  <span class="menu-dropdown-label">複製</span>
+                  <span class="menu-dropdown-label" data-i18n="edit.copy">複製</span>
                   <span class="menu-shortcut">⌘C</span>
                 </div>
                 <div class="menu-dropdown-item disabled">
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">content_paste</span></span
                   >
-                  <span class="menu-dropdown-label">貼上</span>
+                  <span class="menu-dropdown-label" data-i18n="edit.paste">貼上</span>
                   <span class="menu-shortcut">⌘V</span>
                 </div>
                 <div class="menu-dropdown-divider"></div>
@@ -136,7 +152,7 @@
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">find_replace</span></span
                   >
-                  <span class="menu-dropdown-label">尋找與取代</span>
+                  <span class="menu-dropdown-label" data-i18n="edit.findReplace">尋找與取代</span>
                   <span class="menu-shortcut">⌘⇧H</span>
                 </div>
                 <div class="menu-dropdown-divider"></div>
@@ -144,35 +160,35 @@
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">badge</span></span
                   >
-                  <span class="menu-dropdown-label">編輯暱稱</span>
+                  <span class="menu-dropdown-label" data-i18n="edit.nickname">編輯暱稱</span>
                 </div>
               </div>
             </span>
-            <span>查看</span><span>插入</span>
-            <span>格式</span>
+            <span data-i18n="menu.view">查看</span><span data-i18n="menu.insert">插入</span>
+            <span data-i18n="menu.format">格式</span>
             <span class="menu-item" id="menu-data">
-              資料
+              <span class="menu-label" data-i18n="menu.data">資料</span>
               <div class="menu-dropdown" id="menu-data-dropdown">
-                <div class="menu-dropdown-section">套用範本</div>
+                <div class="menu-dropdown-section" data-i18n="data.applyTemplate">套用範本</div>
                 <div class="menu-dropdown-item theme-item" data-theme="expense">
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">receipt_long</span></span
                   >
-                  <span class="menu-dropdown-label">報銷明細</span>
+                  <span class="menu-dropdown-label" data-i18n="data.expense">報銷明細</span>
                   <span class="material-symbols-outlined theme-check">check</span>
                 </div>
                 <div class="menu-dropdown-item theme-item" data-theme="hiring">
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">group</span></span
                   >
-                  <span class="menu-dropdown-label">招聘進度追蹤</span>
+                  <span class="menu-dropdown-label" data-i18n="data.hiring">招聘進度追蹤</span>
                   <span class="material-symbols-outlined theme-check">check</span>
                 </div>
                 <div class="menu-dropdown-item theme-item" data-theme="ar">
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">payments</span></span
                   >
-                  <span class="menu-dropdown-label">應收帳款</span>
+                  <span class="menu-dropdown-label" data-i18n="data.ar">應收帳款</span>
                   <span class="material-symbols-outlined theme-check">check</span>
                 </div>
                 <div class="menu-dropdown-divider"></div>
@@ -180,119 +196,119 @@
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">sort</span></span
                   >
-                  <span class="menu-dropdown-label">排序範圍</span>
+                  <span class="menu-dropdown-label" data-i18n="data.sortRange">排序範圍</span>
                   <span class="menu-shortcut">▸</span>
                 </div>
                 <div class="menu-dropdown-item disabled">
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">filter_alt</span></span
                   >
-                  <span class="menu-dropdown-label">建立篩選器</span>
+                  <span class="menu-dropdown-label" data-i18n="data.createFilter">建立篩選器</span>
                 </div>
                 <div class="menu-dropdown-item disabled">
                   <span class="menu-dropdown-icon"
                     ><span class="material-symbols-outlined">rule</span></span
                   >
-                  <span class="menu-dropdown-label">資料驗證</span>
+                  <span class="menu-dropdown-label" data-i18n="data.validation">資料驗證</span>
                 </div>
               </div>
             </span>
-            <span>工具</span>
+            <span data-i18n="menu.tools">工具</span>
             <span class="menu-gemini">
               <span class="material-symbols-outlined gemini-icon">auto_awesome</span>Gemini
             </span>
-            <span>擴充功能</span><span>說明</span>
+            <span data-i18n="menu.extensions">擴充功能</span><span data-i18n="menu.help">說明</span>
           </div>
         </div>
         <div class="titlebar-spacer"></div>
         <div class="titlebar-right">
-          <button class="title-icon" tabindex="-1" title="顯示編輯記錄">
+          <button class="title-icon" tabindex="-1" data-i18n-title="tb.history" title="顯示編輯記錄">
             <span class="material-symbols-outlined">history</span>
           </button>
-          <button class="title-icon" tabindex="-1" title="開啟對話">
+          <button class="title-icon" tabindex="-1" data-i18n-title="tb.chat" title="開啟對話">
             <span class="material-symbols-outlined">chat_bubble</span>
           </button>
-          <button class="title-icon" tabindex="-1" title="加入會議">
+          <button class="title-icon" tabindex="-1" data-i18n-title="tb.meet" title="加入會議">
             <span class="material-symbols-outlined">videocam</span>
           </button>
-          <button id="share-btn" class="share-btn" title="複製分享連結">
+          <button id="share-btn" class="share-btn" data-i18n-title="tb.shareTitle" title="複製分享連結">
             <span class="material-symbols-outlined">lock</span>
-            共用
+            <span class="share-label" data-i18n="tb.share">共用</span>
           </button>
         </div>
       </div>
 
       <div class="toolbar">
-        <button class="toolbar-btn" tabindex="-1" title="搜尋選單">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.searchMenu" title="搜尋選單">
           <span class="material-symbols-outlined">search</span>
         </button>
-        <button class="toolbar-btn" tabindex="-1" title="復原">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="edit.undo" title="復原">
           <span class="material-symbols-outlined">undo</span>
         </button>
-        <button class="toolbar-btn" tabindex="-1" title="重做">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="edit.redo" title="重做">
           <span class="material-symbols-outlined">redo</span>
         </button>
-        <button class="toolbar-btn" tabindex="-1" title="列印">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.print" title="列印">
           <span class="material-symbols-outlined">print</span>
         </button>
-        <button class="toolbar-btn" tabindex="-1" title="複製格式">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.paintFormat" title="複製格式">
           <span class="material-symbols-outlined">format_paint</span>
         </button>
         <div class="toolbar-divider"></div>
         <button class="toolbar-btn toolbar-zoom" tabindex="-1">100%<span class="caret">▾</span></button>
         <div class="toolbar-divider"></div>
-        <button class="toolbar-btn" tabindex="-1" title="格式設為貨幣">NT$</button>
-        <button class="toolbar-btn" tabindex="-1" title="格式設為百分比">%</button>
-        <button class="toolbar-btn" tabindex="-1" title="減少小數位數">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.fmtCurrency" title="格式設為貨幣">NT$</button>
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.fmtPercent" title="格式設為百分比">%</button>
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.fmtDecDec" title="減少小數位數">
           <span class="material-symbols-outlined">decimal_decrease</span>
         </button>
-        <button class="toolbar-btn" tabindex="-1" title="增加小數位數">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.fmtDecInc" title="增加小數位數">
           <span class="material-symbols-outlined">decimal_increase</span>
         </button>
-        <button class="toolbar-btn" tabindex="-1" title="更多格式">123</button>
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.fmtMore" title="更多格式">123</button>
         <div class="toolbar-divider"></div>
-        <button class="toolbar-btn toolbar-font" tabindex="-1">預設 (Arial)<span class="caret">▾</span></button>
+        <button class="toolbar-btn toolbar-font" tabindex="-1"><span data-i18n="tool.fontDefault">預設 (Arial)</span><span class="caret">▾</span></button>
         <div class="toolbar-divider"></div>
-        <button class="toolbar-btn toolbar-icon-sm" tabindex="-1" title="縮小字型">
+        <button class="toolbar-btn toolbar-icon-sm" tabindex="-1" data-i18n-title="tool.fontDec" title="縮小字型">
           <span class="material-symbols-outlined">remove</span>
         </button>
         <div class="toolbar-fontsize">10</div>
-        <button class="toolbar-btn toolbar-icon-sm" tabindex="-1" title="放大字型">
+        <button class="toolbar-btn toolbar-icon-sm" tabindex="-1" data-i18n-title="tool.fontInc" title="放大字型">
           <span class="material-symbols-outlined">add</span>
         </button>
         <div class="toolbar-divider"></div>
-        <button class="toolbar-btn toolbar-text-btn" tabindex="-1" title="粗體"><b>B</b></button>
-        <button class="toolbar-btn toolbar-text-btn" tabindex="-1" title="斜體"><i>I</i></button>
-        <button class="toolbar-btn toolbar-text-btn" tabindex="-1" title="刪除線">
+        <button class="toolbar-btn toolbar-text-btn" tabindex="-1" data-i18n-title="tool.bold" title="粗體"><b>B</b></button>
+        <button class="toolbar-btn toolbar-text-btn" tabindex="-1" data-i18n-title="tool.italic" title="斜體"><i>I</i></button>
+        <button class="toolbar-btn toolbar-text-btn" tabindex="-1" data-i18n-title="tool.strike" title="刪除線">
           <span class="material-symbols-outlined">format_strikethrough</span>
         </button>
-        <button class="toolbar-btn toolbar-text-btn" tabindex="-1" title="文字顏色">
+        <button class="toolbar-btn toolbar-text-btn" tabindex="-1" data-i18n-title="tool.textColor" title="文字顏色">
           <span class="material-symbols-outlined">format_color_text</span>
         </button>
         <div class="toolbar-divider"></div>
-        <button class="toolbar-btn" tabindex="-1" title="填滿色彩">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.fillColor" title="填滿色彩">
           <span class="material-symbols-outlined">format_color_fill</span>
         </button>
-        <button class="toolbar-btn" tabindex="-1" title="框線">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.borders" title="框線">
           <span class="material-symbols-outlined">border_all</span>
         </button>
-        <button class="toolbar-btn" tabindex="-1" title="合併儲存格">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.mergeCells" title="合併儲存格">
           <span class="material-symbols-outlined">cell_merge</span>
         </button>
         <div class="toolbar-divider"></div>
-        <button class="toolbar-btn" tabindex="-1" title="水平對齊">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.hAlign" title="水平對齊">
           <span class="material-symbols-outlined">format_align_left</span><span class="caret">▾</span>
         </button>
-        <button class="toolbar-btn" tabindex="-1" title="垂直對齊">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.vAlign" title="垂直對齊">
           <span class="material-symbols-outlined">vertical_align_bottom</span><span class="caret">▾</span>
         </button>
-        <button class="toolbar-btn" tabindex="-1" title="自動換行">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.wrap" title="自動換行">
           <span class="material-symbols-outlined">wrap_text</span><span class="caret">▾</span>
         </button>
-        <button class="toolbar-btn" tabindex="-1" title="文字旋轉">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.rotate" title="文字旋轉">
           <span class="material-symbols-outlined">format_color_text</span><span class="caret">▾</span>
         </button>
-        <button class="toolbar-btn" tabindex="-1" title="更多">
+        <button class="toolbar-btn" tabindex="-1" data-i18n-title="tool.more" title="更多">
           <span class="material-symbols-outlined">more_vert</span>
         </button>
       </div>
@@ -310,14 +326,14 @@
       </div>
 
       <div class="footer">
-        <button class="footer-btn" tabindex="-1" title="新增工作表">
+        <button class="footer-btn" tabindex="-1" data-i18n-title="footer.addSheet" title="新增工作表">
           <span class="material-symbols-outlined">add</span>
         </button>
-        <button class="footer-btn" tabindex="-1" title="所有工作表">
+        <button class="footer-btn" tabindex="-1" data-i18n-title="footer.allSheets" title="所有工作表">
           <span class="material-symbols-outlined">menu</span>
         </button>
         <div class="footer-tab">
-          工作表 1
+          <span data-i18n="footer.sheet1">工作表 1</span>
           <span class="caret">▾</span>
         </div>
         <div class="footer-presence" id="presence"></div>
@@ -328,27 +344,27 @@
 
       <dialog id="settings-dialog" class="dialog">
         <form method="dialog" id="settings-form">
-          <h3 class="dialog-title">偏好設定</h3>
+          <h3 class="dialog-title" data-i18n="settings.title">偏好設定</h3>
 
           <div class="dialog-section">
-            <div class="dialog-section-title">通知</div>
+            <div class="dialog-section-title" data-i18n="settings.sectionNotifications">通知</div>
             <label class="dialog-toggle">
               <input type="checkbox" id="setting-sound" />
-              <span>音效（新訊息時播放）</span>
+              <span data-i18n="settings.sound">音效（新訊息時播放）</span>
             </label>
             <label class="dialog-toggle">
               <input type="checkbox" id="setting-desktop" />
-              <span>桌面通知</span>
+              <span data-i18n="settings.desktop">桌面通知</span>
             </label>
-            <div class="dialog-hint" id="setting-desktop-hint">
+            <div class="dialog-hint" id="setting-desktop-hint" data-i18n="settings.desktopHint">
               第一次啟用時瀏覽器會要求權限。通知內容會偽裝成試算表協作通知。
             </div>
           </div>
 
           <div class="dialog-section">
-            <div class="dialog-section-title">偽裝</div>
+            <div class="dialog-section-title" data-i18n="settings.sectionDisguise">偽裝</div>
             <label class="dialog-row">
-              <span>閒置自動隱藏</span>
+              <span data-i18n="settings.autoHide">閒置自動隱藏</span>
               <span class="dialog-row-control">
                 <input
                   type="number"
@@ -357,22 +373,22 @@
                   max="120"
                   step="1"
                 />
-                <span class="dialog-row-suffix">秒</span>
+                <span class="dialog-row-suffix" data-i18n="settings.seconds">秒</span>
               </span>
             </label>
           </div>
 
           <div class="dialog-actions">
-            <button type="button" class="btn" id="settings-cancel">取消</button>
-            <button type="submit" class="btn btn-primary" id="settings-save">儲存</button>
+            <button type="button" class="btn" id="settings-cancel" data-i18n="common.cancel">取消</button>
+            <button type="submit" class="btn btn-primary" id="settings-save" data-i18n="common.save">儲存</button>
           </div>
         </form>
       </dialog>
 
       <dialog id="nickname-dialog" class="dialog">
         <form method="dialog" id="nickname-form">
-          <h3 class="dialog-title">編輯暱稱</h3>
-          <p class="dialog-hint">會更新你在這個房間的欄標題，舊訊息的作者名稱不變。</p>
+          <h3 class="dialog-title" data-i18n="nickname.editTitle">編輯暱稱</h3>
+          <p class="dialog-hint" data-i18n="nickname.editHint">會更新你在這個房間的欄標題，舊訊息的作者名稱不變。</p>
           <input
             id="nickname-input"
             type="text"
@@ -382,8 +398,8 @@
           />
           <div id="nickname-error" class="dialog-error"></div>
           <div class="dialog-actions">
-            <button type="button" class="btn" id="nickname-cancel">取消</button>
-            <button type="submit" class="btn btn-primary" id="nickname-save">儲存</button>
+            <button type="button" class="btn" id="nickname-cancel" data-i18n="common.cancel">取消</button>
+            <button type="submit" class="btn btn-primary" id="nickname-save" data-i18n="common.save">儲存</button>
           </div>
         </form>
       </dialog>

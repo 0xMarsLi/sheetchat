@@ -15,21 +15,40 @@
           <div class="lobby-logo-text">sheetchat</div>
         </div>
 
-        <h2>暱稱</h2>
-        <input id="nickname" type="text" placeholder="你的名字（會出現在欄標題）" maxlength="16" />
+        <h2 data-i18n="lobby.nickname">暱稱</h2>
+        <input
+          id="nickname"
+          type="text"
+          data-i18n-placeholder="lobby.nicknamePh"
+          placeholder="你的名字（會出現在欄標題）"
+          maxlength="16"
+        />
 
-        <h2>建立新房間</h2>
-        <input id="create-password" type="password" placeholder="房間密碼（選填，4-8 字）" maxlength="8" autocomplete="new-password" />
-        <button id="create-btn" class="btn btn-primary" style="width: 100%">建立並進入</button>
+        <h2 data-i18n="lobby.createRoom">建立新房間</h2>
+        <input
+          id="create-password"
+          type="password"
+          data-i18n-placeholder="lobby.pwPh"
+          placeholder="房間密碼（選填，4-8 字）"
+          maxlength="8"
+          autocomplete="new-password"
+        />
+        <button id="create-btn" class="btn btn-primary" style="width: 100%" data-i18n="lobby.createBtn">建立並進入</button>
 
-        <h2>或加入現有房間</h2>
+        <h2 data-i18n="lobby.joinTitle">或加入現有房間</h2>
         <div class="lobby-row">
-          <input id="room-id" type="text" placeholder="輸入房間碼" maxlength="12" />
-          <button id="join-btn" class="btn">加入</button>
+          <input
+            id="room-id"
+            type="text"
+            data-i18n-placeholder="lobby.roomIdPh"
+            placeholder="輸入房間碼"
+            maxlength="12"
+          />
+          <button id="join-btn" class="btn" data-i18n="lobby.joinBtn">加入</button>
         </div>
 
         <div id="recent-section" class="recent-section" hidden>
-          <h2>最近加入</h2>
+          <h2 data-i18n="lobby.recent">最近加入</h2>
           <ul id="recent-list" class="recent-list"></ul>
         </div>
 
