@@ -16,8 +16,16 @@ import {
 import { MOCK_THEMES, DEFAULT_THEME } from './mocks.js';
 import { hashPassword } from './crypto.js';
 import { VERSION } from './version.js';
+import {
+  loadSettings,
+  saveSettings,
+  notifyNewMessage,
+  requestDesktopPermission,
+} from './notifications.js';
 
 console.log(`sheetchat ${VERSION}`);
+const footerVersionEl = document.getElementById('footer-version');
+if (footerVersionEl) footerVersionEl.textContent = `v${VERSION}`;
 
 const COLORS = [
   '#1a73e8',
@@ -78,13 +86,22 @@ const nicknameError = document.getElementById('nickname-error');
 const nicknameForm = document.getElementById('nickname-form');
 const nicknameCancel = document.getElementById('nickname-cancel');
 
+const settingsMenuItem = document.getElementById('menu-file-settings');
+const settingsDialog = document.getElementById('settings-dialog');
+const settingsForm = document.getElementById('settings-form');
+const settingsCancel = document.getElementById('settings-cancel');
+const settingSoundInput = document.getElementById('setting-sound');
+const settingDesktopInput = document.getElementById('setting-desktop');
+const settingInactivityInput = document.getElementById('setting-inactivity');
+
 const appEl = document.querySelector('.app');
 let mockTheme = localStorage.getItem('sheetchat:mockTheme') || DEFAULT_THEME;
 if (!MOCK_THEMES[mockTheme]) mockTheme = DEFAULT_THEME;
 let mockActive = true;
 appEl.classList.add('is-mock');
 
-const INACTIVITY_MS = 10000;
+let settings = loadSettings();
+let inactivityMs = settings.inactivitySeconds * 1000;
 let inactivityTimer = null;
 
 const BASE_TITLE = '未命名的試算表 - Google 試算表';
@@ -125,7 +142,7 @@ const resetInactivityTimer = () => {
   clearTimeout(inactivityTimer);
   inactivityTimer = setTimeout(() => {
     if (inputElement) inputElement.blur();
-  }, INACTIVITY_MS);
+  }, inactivityMs);
 };
 
 const stopInactivityTimer = () => {
@@ -243,6 +260,46 @@ nicknameDialog.addEventListener('close', () => {
   }
 });
 
+const openSettingsDialog = () => {
+  settings = loadSettings();
+  settingSoundInput.checked = !!settings.sound;
+  settingDesktopInput.checked = !!settings.desktop;
+  settingInactivityInput.value = settings.inactivitySeconds;
+  settingsDialog.showModal();
+};
+
+settingsMenuItem.addEventListener('click', (e) => {
+  e.stopPropagation();
+  closeAllDropdowns();
+  openSettingsDialog();
+});
+
+settingsCancel.addEventListener('click', () => settingsDialog.close());
+
+settingDesktopInput.addEventListener('change', async () => {
+  if (!settingDesktopInput.checked) return;
+  const result = await requestDesktopPermission();
+  if (result !== 'granted') {
+    settingDesktopInput.checked = false;
+  }
+});
+
+settingsForm.addEventListener('submit', () => {
+  const seconds = Math.max(
+    3,
+    Math.min(120, parseInt(settingInactivityInput.value, 10) || 10),
+  );
+  settings = {
+    sound: settingSoundInput.checked,
+    desktop: settingDesktopInput.checked,
+    inactivitySeconds: seconds,
+  };
+  saveSettings(settings);
+  inactivityMs = seconds * 1000;
+  if (inactivityTimer) resetInactivityTimer();
+  settingsDialog.close();
+});
+
 const indexToLetter = (i) => {
   let s = '';
   let n = i + 1;
@@ -333,6 +390,53 @@ const sendMessage = async (text) => {
   });
 };
 
+const IMG_MAX_DIM = 1280;
+const IMG_QUALITY_START = 0.75;
+const IMG_MAX_DATAURL_LEN = 900 * 1024; // ~900KB, leaves headroom under 1MB Firestore doc cap
+
+const compressImage = (file) =>
+  new Promise((resolve, reject) => {
+    const objUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const ratio = Math.min(1, IMG_MAX_DIM / Math.max(img.width, img.height));
+      const w = Math.round(img.width * ratio);
+      const h = Math.round(img.height * ratio);
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(objUrl);
+      let quality = IMG_QUALITY_START;
+      let dataUrl = canvas.toDataURL('image/jpeg', quality);
+      while (dataUrl.length > IMG_MAX_DATAURL_LEN && quality > 0.3) {
+        quality -= 0.1;
+        dataUrl = canvas.toDataURL('image/jpeg', quality);
+      }
+      if (dataUrl.length > IMG_MAX_DATAURL_LEN) {
+        reject(new Error('圖片太大，請改傳較小的圖'));
+        return;
+      }
+      resolve(dataUrl);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objUrl);
+      reject(new Error('圖片載入失敗'));
+    };
+    img.src = objUrl;
+  });
+
+const sendImage = async (dataUrl) => {
+  await addDoc(collection(db, 'rooms', roomId, 'messages'), {
+    author: nickname,
+    column: selfColumn,
+    text: '',
+    image: dataUrl,
+    createdAt: serverTimestamp(),
+    expiresAt: nextMidnight(),
+  });
+};
+
 const buildInputRow = (numCols) => {
   const preservedText = inputElement?.value || '';
   const wasFocused = document.activeElement === inputElement;
@@ -383,6 +487,25 @@ const attachInputHandlers = (input) => {
   input.addEventListener('compositionend', () => {
     lastComposeEnd = Date.now();
   });
+  input.addEventListener('paste', async (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (!file) return;
+        try {
+          const dataUrl = await compressImage(file);
+          await sendImage(dataUrl);
+        } catch (err) {
+          console.error('paste image failed', err);
+          showToast(err.message || '圖片傳送失敗');
+        }
+        return;
+      }
+    }
+  });
   input.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
     if (e.isComposing || e.keyCode === 229) return;
@@ -426,7 +549,7 @@ const updateFormulaBar = () => {
   }
   if (messages.length > 0) {
     const last = messages[messages.length - 1];
-    formulaEl.textContent = last.text;
+    formulaEl.textContent = last.text || (last.image ? '[圖片]' : '');
   } else {
     formulaEl.textContent = '';
   }
@@ -443,8 +566,21 @@ const shortenUrl = (url) => {
   return `${url.slice(0, head)}…${url.slice(-tail)}`;
 };
 
-const renderTextWithLinks = (cell, text) => {
-  cell.textContent = '';
+const makeExternalLink = (href, label, titleText) => {
+  const a = document.createElement('a');
+  a.href = href;
+  a.textContent = label;
+  if (titleText) a.title = titleText;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.className = 'msg-link';
+  // prevent input blur when clicking link; otherwise renderGrid()
+  // detaches the anchor before mouseup, cancelling the navigation
+  a.addEventListener('mousedown', (e) => e.preventDefault());
+  return a;
+};
+
+const appendTextWithLinks = (cell, text) => {
   let last = 0;
   for (const m of text.matchAll(URL_RE)) {
     if (m.index > last) cell.appendChild(document.createTextNode(text.slice(last, m.index)));
@@ -452,21 +588,45 @@ const renderTextWithLinks = (cell, text) => {
     const tail = url.match(TRAILING_PUNCT);
     const trailing = tail ? tail[0] : '';
     if (trailing) url = url.slice(0, -trailing.length);
-    const a = document.createElement('a');
-    a.href = url;
-    a.textContent = shortenUrl(url);
-    a.title = url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.className = 'msg-link';
-    // prevent input blur when clicking link; otherwise renderGrid()
-    // detaches the anchor before mouseup, cancelling the navigation
-    a.addEventListener('mousedown', (e) => e.preventDefault());
-    cell.appendChild(a);
+    cell.appendChild(makeExternalLink(url, shortenUrl(url), url));
     if (trailing) cell.appendChild(document.createTextNode(trailing));
     last = m.index + m[0].length;
   }
   if (last < text.length) cell.appendChild(document.createTextNode(text.slice(last)));
+};
+
+const openImageInNewTab = async (dataUrl) => {
+  // Chrome blocks top-level navigation to data: URLs, so convert to blob URL.
+  // window.open must be called synchronously inside the click handler to avoid
+  // popup blockers; we open about:blank first, then redirect after fetch.
+  const w = window.open('about:blank', '_blank');
+  try {
+    const blob = await (await fetch(dataUrl)).blob();
+    const url = URL.createObjectURL(blob);
+    if (w) w.location.href = url;
+  } catch (err) {
+    console.error('open image failed', err);
+    if (w) w.close();
+  }
+};
+
+const renderMessageContent = (cell, content) => {
+  cell.textContent = '';
+  if (content.text) appendTextWithLinks(cell, content.text);
+  if (content.image) {
+    if (content.text) cell.appendChild(document.createTextNode(' '));
+    const a = document.createElement('a');
+    a.href = '#';
+    a.textContent = '[圖片]';
+    a.title = '點擊開啟圖片';
+    a.className = 'msg-link';
+    a.addEventListener('mousedown', (e) => e.preventDefault());
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      openImageInNewTab(content.image);
+    });
+    cell.appendChild(a);
+  }
 };
 
 const appendCell = (parent, className, gridCol, gridRow, text) => {
@@ -499,9 +659,10 @@ const buildContentMap = (mock) => {
       const colIdx = letterToIndex(msg.column);
       map.set(`${i + 2}|${colIdx + 2}`, {
         text: msg.text,
+        image: msg.image,
         classes: ['message'],
         title: `${msg.author} • ${formatTime(msg.createdAt)}`,
-        linkify: true,
+        rich: true,
       });
     });
   }
@@ -541,8 +702,8 @@ const renderGrid = () => {
     for (let c = 0; c < numCols; c += 1) {
       const content = contentMap.get(`${r + 2}|${c + 2}`);
       const cls = content ? `cell ${content.classes.join(' ')}` : 'cell';
-      const cell = appendCell(gridEl, cls, c + 2, r + 2, content && !content.linkify ? content.text : '');
-      if (content?.linkify) renderTextWithLinks(cell, content.text);
+      const cell = appendCell(gridEl, cls, c + 2, r + 2, content && !content.rich ? content.text : '');
+      if (content?.rich) renderMessageContent(cell, content);
       if (content && content.title) cell.title = content.title;
     }
   }
@@ -663,11 +824,18 @@ const start = async () => {
           return m.expiresAt.toDate() > now;
         });
 
-      const delta = Math.max(0, messages.length - prevMessageCount);
       prevMessageCount = messages.length;
-      if (!isFirstSnapshot && delta > 0 && !isReadingChat()) {
-        unreadCount += delta;
-        updateTitle();
+      if (!isFirstSnapshot) {
+        const newFromOthers = snap
+          .docChanges()
+          .filter((c) => c.type === 'added')
+          .map((c) => c.doc.data())
+          .filter((m) => m.author !== nickname);
+        if (newFromOthers.length > 0 && !isReadingChat()) {
+          unreadCount += newFromOthers.length;
+          updateTitle();
+          notifyNewMessage();
+        }
       }
 
       renderGrid();

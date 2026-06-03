@@ -55,6 +55,12 @@
                   <span class="menu-dropdown-label">回到首頁</span>
                   <span class="menu-shortcut">⌘⇧H</span>
                 </a>
+                <div class="menu-dropdown-item" id="menu-file-settings">
+                  <span class="menu-dropdown-icon"
+                    ><span class="material-symbols-outlined">settings</span></span
+                  >
+                  <span class="menu-dropdown-label">設定</span>
+                </div>
                 <div class="menu-dropdown-divider"></div>
                 <div class="menu-dropdown-item disabled">
                   <span class="menu-dropdown-icon"
@@ -315,9 +321,53 @@
           <span class="caret">▾</span>
         </div>
         <div class="footer-presence" id="presence"></div>
+        <div class="footer-version" id="footer-version"></div>
       </div>
 
       <div id="toast" class="toast"></div>
+
+      <dialog id="settings-dialog" class="dialog">
+        <form method="dialog" id="settings-form">
+          <h3 class="dialog-title">偏好設定</h3>
+
+          <div class="dialog-section">
+            <div class="dialog-section-title">通知</div>
+            <label class="dialog-toggle">
+              <input type="checkbox" id="setting-sound" />
+              <span>音效（新訊息時播放）</span>
+            </label>
+            <label class="dialog-toggle">
+              <input type="checkbox" id="setting-desktop" />
+              <span>桌面通知</span>
+            </label>
+            <div class="dialog-hint" id="setting-desktop-hint">
+              第一次啟用時瀏覽器會要求權限。通知內容會偽裝成試算表協作通知。
+            </div>
+          </div>
+
+          <div class="dialog-section">
+            <div class="dialog-section-title">偽裝</div>
+            <label class="dialog-row">
+              <span>閒置自動隱藏</span>
+              <span class="dialog-row-control">
+                <input
+                  type="number"
+                  id="setting-inactivity"
+                  min="3"
+                  max="120"
+                  step="1"
+                />
+                <span class="dialog-row-suffix">秒</span>
+              </span>
+            </label>
+          </div>
+
+          <div class="dialog-actions">
+            <button type="button" class="btn" id="settings-cancel">取消</button>
+            <button type="submit" class="btn btn-primary" id="settings-save">儲存</button>
+          </div>
+        </form>
+      </dialog>
 
       <dialog id="nickname-dialog" class="dialog">
         <form method="dialog" id="nickname-form">
